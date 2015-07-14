@@ -1,0 +1,101 @@
+﻿<Page
+    x:Class="NuBank.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NuBank.View"
+    xmlns:data ="using:NuBank.ViewModel"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:src="using:NuBank.View"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    >
+
+    <Page.Resources>
+        <local:ConvertValueToReal x:Key="convertValueToReal" />
+        <local:ConvertDate x:Key="convertDate" />
+        <local:ConvertStatusInColor x:Key="convertStatusToColor" />
+        <local:ConvertDatetoMonthBill x:Key="convertDateToMonth" />
+        <local:ConvertPaidedBill x:Key="convertPaidedBill" />
+        <local:ConvertGerarBoleto x:Key="convertGerarBoleto" />
+        <local:ConvertDateFormat x:Key="convertDateFormat" />
+        <local:ConvertGridState x:Key="convertGridState" />
+        <local:ConvertButtonGerarBoleto x:Key="convertButtonGerarBoleto" />
+        <local:ConvertCloseddBill x:Key="convertCloseddBill" />
+        <data:MainWindowVM x:Name="VM"></data:MainWindowVM>
+    </Page.Resources>
+
+
+
+    <Grid>
+        <GridView x:Name="BillGridView"  
+                  ItemsSource="{Binding Bills}" Background="White" HorizontalAlignment="Left" 
+                  VerticalAlignment="Top">
+            <GridView.ItemTemplate>
+                <DataTemplate>
+                    <Grid   Width="{Binding UiWidth, Source={StaticResource VM}}" Height="{Binding UiHeight, Source={StaticResource VM}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10*"/>
+                            <RowDefinition Height="15*"/>
+                            <RowDefinition Height="15*"/>
+                            <RowDefinition Height="60*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="mes" Text="{Binding summary.due_date, Converter={StaticResource convertDateToMonth}}"  Foreground="{Binding Path=state, Converter={StaticResource convertStatusToColor}}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0"/>
+                        <Rectangle  x:Name="colorRect" Fill="{Binding Path=state, Converter={StaticResource convertStatusToColor}}" Grid.Row="1" Margin="0,0,0,0"/>
+                        <TextBlock x:Name="valor" Text="{Binding summary.total_balance, Converter={StaticResource convertValueToReal}}" HorizontalAlignment="Center" Margin="0,30,0,0" VerticalAlignment="Center" Grid.Row="1" />
+                        <TextBlock x:Name="vencimento" Text="{Binding summary.due_date, Converter={StaticResource convertDate}}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" />
+                        <StackPanel x:Name="overdue" Background="White" Visibility="{Binding Path=state, Converter={StaticResource convertPaidedBill}}" Grid.Row="2" >
+                            <TextBlock x:Name="stringPagamento" Text="PAGAMENTO RECEBIDO" Foreground="#7ED321" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Center" Grid.Row="2" />
+                            <TextBlock x:Name="valorPago" Text="{Binding summary.paid, Converter={StaticResource convertValueToReal}}" FontSize="14" Foreground="#7ED321" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="2" />
+                        </StackPanel>
+                        <StackPanel x:Name="open" Background="White" Visibility="{Binding Path=state, Converter={StaticResource convertGerarBoleto}}" Grid.Row="{Binding Path=state, Converter={StaticResource convertButtonGerarBoleto}}">
+                            <Button  Background="White" Content="GERAR BOLETO" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20,0,0"
+                                    Foreground="{Binding Path=state, Converter={StaticResource convertStatusToColor}}"
+                                    BorderBrush="{Binding Path=state, Converter={StaticResource convertStatusToColor}}"
+                                     FontSize="14" BorderThickness="1"  CommandParameter="{Binding summary}" Command="{Binding ClickCommand, Source={StaticResource VM}}" />
+                        </StackPanel>
+                        <StackPanel x:Name="closed" Background="White" Margin="20,30,0,0" HorizontalAlignment="Center"  Visibility="{Binding Path=state, Converter={StaticResource convertCloseddBill}}" Grid.Row="2" >
+                            <TextBlock x:Name="gastoDoMes" Foreground="{Binding Path=state, Converter={StaticResource convertStatusToColor}}" Grid.Row="2">
+                                 <Run Text="Gasto do Mês:" />
+                                 <Run Text="   " />
+                                 <Run Text="{Binding summary.total_balance, Converter={StaticResource convertValueToReal}}" />
+                            </TextBlock>
+                            <TextBlock x:Name="valorNPagos" Foreground="{Binding Path=state, Converter={StaticResource convertStatusToColor}}" Margin="0,0,0,0" Grid.Row="2">
+                                 <Run Text="Valores Não Pagos:" />
+                                 <Run Text="   " />
+                                 <Run Text="{Binding summary.past_balance, Converter={StaticResource convertValueToReal}}" />
+                            </TextBlock>
+                            <TextBlock x:Name="juros" Foreground="{Binding Path=state, Converter={StaticResource convertStatusToColor}}" Margin="0,0,0,0" Grid.Row="2">
+                                 <Run Text="Juros 7,75%" />
+                                 <Run Text="   " />
+                                 <Run Text="0" />
+                            </TextBlock>
+                        </StackPanel>
+                        <ListView x:Name="lineItemsList" BorderThickness="0,1,0,0" BorderBrush="Gray"  Margin="0,0,0,0" ItemsSource="{Binding line_items}" Background="White" Foreground="Black" Grid.Row="{Binding state, Converter={StaticResource convertGridState}}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="100"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="10"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock x:Name="itemDate" Foreground="Gray" Text="{Binding post_date, Converter={StaticResource convertDateFormat}}" Grid.Column="0" Grid.Row="1"/>
+                                        <TextBlock x:Name="title" Foreground="Black" Text="{Binding title}" Grid.Column="1" Grid.Row="1"/>
+                                        <TextBlock x:Name="amount" Foreground="Black" Text="{Binding amount, Converter={StaticResource convertValueToReal}}" Grid.Column="2" Grid.Row="1"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
+</Page>
+

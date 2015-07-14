@@ -1,0 +1,1 @@
+C:\Users\Rafael\documents\visual studio 2013\Projects\NuBank\NuBank\NuBank.WindowsPhone\NuBank.WindowsPhone.csproj;neutral
