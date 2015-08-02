@@ -12,7 +12,8 @@ namespace NuBank.View
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            return String.Format(new CultureInfo("pt-BR"), "{0:C}",value);
+            double db = (double)((int)value) / 100;
+            return String.Format(new CultureInfo("pt-BR"), "{0:C}", db);
         }
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
